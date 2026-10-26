@@ -1,5 +1,8 @@
 # python-automation-kit
 
+[![CI](https://github.com/Zhiyilang/python-automation-kit/actions/workflows/test.yml/badge.svg)](https://github.com/Zhiyilang/python-automation-kit/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 零依赖（纯 Python 标准库）的日常自动化小工具集。拿来即用，不需要 `pip install` 任何东西，Windows / macOS / Linux 通用。
 
 每一个脚本都**默认安全**：查重只报告不删、重命名默认 dry-run，避免误操作系统文件。
