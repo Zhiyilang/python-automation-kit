@@ -3,13 +3,19 @@
 
 Zero dependencies: Python standard library only. Handles UTF-8 and UTF-8-with-BOM.
 
+Accepts one or more arguments; each may be a glob pattern or a literal path.
+Quote your globs in bash so the shell does not expand them first.
+
 Examples
 --------
-    # Merge every CSV in ./data into merged.csv
+    # Merge every CSV in ./data into merged.csv (pattern handled by the script)
     python csv_merge.py "data/*.csv"
 
     # Custom output name
     python csv_merge.py "reports/*.csv" -o all_reports.csv
+
+    # Several explicit files or patterns (also fine if your shell already expanded them)
+    python csv_merge.py a.csv b.csv -o merged.csv
 """
 import argparse
 import csv
@@ -22,13 +28,25 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description="Merge CSV files with the same header into one."
     )
-    ap.add_argument("pattern", help="Glob pattern, e.g. 'data/*.csv'")
+    ap.add_argument(
+        "patterns",
+        nargs="+",
+        help="One or more glob patterns or file paths, e.g. 'data/*.csv'",
+    )
     ap.add_argument("-o", "--output", default="merged.csv", help="Output file")
     args = ap.parse_args()
 
-    files = sorted(glob.glob(args.pattern))
+    files = []
+    for pat in args.patterns:
+        matched = sorted(glob.glob(pat))
+        if not matched and os.path.exists(pat):
+            matched = [pat]
+        if not matched:
+            print(f"No files matched: {pat}", file=sys.stderr)
+        files.extend(matched)
+    files = sorted(set(files))
     if not files:
-        print(f"No files matched: {args.pattern}")
+        print("No files matched any pattern.")
         return 1
 
     header = None
