@@ -1,0 +1,34 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Compile + run all tools on sample data
+        run: |
+          python3 -m py_compile *.py
+          rm -rf /tmp/sample && mkdir -p /tmp/sample/sub
+          printf 'hello\n' > /tmp/sample/a.txt
+          printf 'hello\n' > /tmp/sample/sub/dup.txt
+          printf 'world\n' > /tmp/sample/b.txt
+          printf 'IMG_001\n' > /tmp/sample/IMG_x.jpg
+          printf 'IMG_001\n' > /tmp/sample/IMG_y.jpg
+          printf 'name,age\nAlice,30\n' > /tmp/sample/r1.csv
+          printf 'name,age\nBob,25\n' > /tmp/sample/r2.csv
+          WS="$PWD"
+          python3 "$WS/file_dedup.py" /tmp/sample --min-size 0
+          python3 "$WS/batch_rename.py" /tmp/sample --pattern 'IMG_(.+)' --repl 'photo_\1'
+          python3 "$WS/folder_tree.py" /tmp/sample --max-depth 2
+          python3 "$WS/csv_merge.py" /tmp/sample/r*.csv -o /tmp/sample/merged.csv
+          test -f /tmp/sample/merged.csv && echo "csv merge OK"
+          echo "ALL TOOLS RAN"
