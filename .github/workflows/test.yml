@@ -29,6 +29,10 @@ jobs:
           python3 "$WS/file_dedup.py" /tmp/sample --min-size 0
           python3 "$WS/batch_rename.py" /tmp/sample --pattern 'IMG_(.+)' --repl 'photo_\1'
           python3 "$WS/folder_tree.py" /tmp/sample --max-depth 2
-          python3 "$WS/csv_merge.py" /tmp/sample/r*.csv -o /tmp/sample/merged.csv
-          test -f /tmp/sample/merged.csv && echo "csv merge OK"
+          # quoted -> the script globs internally
+          python3 "$WS/csv_merge.py" "/tmp/sample/r*.csv" -o /tmp/sample/merged.csv
+          test -f /tmp/sample/merged.csv && echo "csv merge (pattern) OK"
+          # unquoted -> bash expands it to several args; must still work
+          python3 "$WS/csv_merge.py" /tmp/sample/r*.csv -o /tmp/sample/merged2.csv
+          test -f /tmp/sample/merged2.csv && echo "csv merge (multi-arg) OK"
           echo "ALL TOOLS RAN"
